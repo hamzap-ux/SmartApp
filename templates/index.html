@@ -1,0 +1,114 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard{% endblock %}
+{% block header_title %}Dashboard Overview{% endblock %}
+
+{% block content %}
+<!-- KPI Cards -->
+<section class="kpi-grid">
+    <div class="kpi-card">
+        <div class="kpi-icon teal"><i class="fa-solid fa-money-bill-wave"></i></div>
+        <div class="kpi-info">
+            <h3>Total Spending</h3>
+            <p class="kpi-value">${{ "%.2f"|format(total_spending) }}</p>
+            <span class="kpi-trend neutral">All time</span>
+        </div>
+    </div>
+    <div class="kpi-card">
+        <div class="kpi-icon purple"><i class="fa-solid fa-layer-group"></i></div>
+        <div class="kpi-info">
+            <h3>Active Subscriptions</h3>
+            <p class="kpi-value">{{ active_subs }}</p>
+            <span class="kpi-trend neutral">Monthly cost: ${{ "%.2f"|format(monthly_sub_cost) }}</span>
+        </div>
+    </div>
+    <div class="kpi-card">
+        <div class="kpi-icon red"><i class="fa-solid fa-calendar-exclamation"></i></div>
+        <div class="kpi-info">
+            <h3>Upcoming Bills</h3>
+            <p class="kpi-value">{{ upcoming_bills }}</p>
+            <span class="kpi-trend neutral">Pending reminders</span>
+        </div>
+    </div>
+</section>
+
+<!-- Charts Section -->
+<section class="charts-grid">
+    <div class="chart-card">
+        <h2>Spending by Category</h2>
+        <div class="chart-container">
+            <canvas id="categoryPieChart"></canvas>
+        </div>
+    </div>
+    <div class="chart-card">
+        <h2>Monthly Trends</h2>
+        <div class="chart-container">
+            <canvas id="trendBarChart"></canvas>
+        </div>
+    </div>
+</section>
+
+<!-- Recent Activity / Upcoming Renewals -->
+<section class="lists-grid">
+    <div class="list-card">
+        <div class="list-card-header">
+            <h2>Upcoming Renewals</h2>
+            <a href="{{ url_for('subscriptions') }}" class="btn-action"><i class="fa-solid fa-plus"></i> Add</a>
+        </div>
+        <ul class="activity-list">
+            {% if upcoming_renewals %}
+                {% for sub in upcoming_renewals %}
+                <li>
+                    <div class="activity-icon"><i class="fa-solid fa-repeat"></i></div>
+                    <div class="activity-details">
+                        <h4>{{ sub.name }}</h4>
+                        <p>Renews on {{ sub.next_renewal or 'N/A' }}</p>
+                    </div>
+                    <div class="activity-amount alert">-${{ "%.2f"|format(sub.amount) }}</div>
+                </li>
+                {% endfor %}
+            {% else %}
+                <li>
+                    <div class="activity-details">
+                        <p style="color: var(--text-muted);">No upcoming renewals.</p>
+                    </div>
+                </li>
+            {% endif %}
+        </ul>
+    </div>
+    <div class="list-card">
+        <div class="list-card-header">
+            <h2>Recent Expenses</h2>
+            <a href="{{ url_for('expenses') }}" class="btn-action"><i class="fa-solid fa-plus"></i> Add</a>
+        </div>
+        <ul class="activity-list">
+            {% if recent_expenses %}
+                {% for exp in recent_expenses %}
+                <li>
+                    <div class="activity-icon"><i class="fa-solid fa-cart-shopping"></i></div>
+                    <div class="activity-details">
+                        <h4>{{ exp.description or exp.category }}</h4>
+                        <p>{{ exp.date }}</p>
+                    </div>
+                    <div class="activity-amount">-${{ "%.2f"|format(exp.amount) }}</div>
+                </li>
+                {% endfor %}
+            {% else %}
+                <li>
+                    <div class="activity-details">
+                        <p style="color: var(--text-muted);">No recent expenses.</p>
+                    </div>
+                </li>
+            {% endif %}
+        </ul>
+    </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Pass dynamic data to JS
+    window.dashboardChartData = {{ chart_data | tojson | safe }};
+</script>
+<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+{% endblock %}

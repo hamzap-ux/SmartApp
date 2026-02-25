@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SmartApp - {% block title %}Finance Dashboard{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <!-- Chart.js for charts -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- FontAwesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="app-container">
+        {% if current_user.is_authenticated %}
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="logo">
+                <i class="fa-solid fa-wallet"></i> SmartApp
+            </div>
+            <nav class="nav-menu">
+                <a href="{{ url_for('index') }}" class="nav-item {% if request.endpoint == 'index' %}active{% endif %}"><i class="fa-solid fa-chart-pie"></i> Dashboard</a>
+                <a href="{{ url_for('subscriptions') }}" class="nav-item {% if request.endpoint == 'subscriptions' %}active{% endif %}"><i class="fa-solid fa-repeat"></i> Subscriptions</a>
+                <a href="{{ url_for('expenses') }}" class="nav-item {% if request.endpoint == 'expenses' %}active{% endif %}"><i class="fa-solid fa-receipt"></i> Expenses</a>
+                <a href="{{ url_for('analytics') }}" class="nav-item {% if request.endpoint == 'analytics' %}active{% endif %}"><i class="fa-solid fa-chart-line"></i> Analytics</a>
+                <a href="{{ url_for('reminders') }}" class="nav-item {% if request.endpoint == 'reminders' %}active{% endif %}"><i class="fa-solid fa-bell"></i> Reminders</a>
+                <a href="{{ url_for('settings') }}" class="nav-item {% if request.endpoint == 'settings' %}active{% endif %}"><i class="fa-solid fa-gear"></i> Settings</a>
+            </nav>
+        </aside>
+        {% endif %}
+
+        <!-- Main Content -->
+        <main class="main-content" {% if not current_user.is_authenticated %}style="margin: 0 auto; max-width: 800px; padding-top: 50px;"{% endif %}>
+            <header class="top-header">
+                <h1>{% block header_title %}Dashboard Overview{% endblock %}</h1>
+                {% if current_user.is_authenticated %}
+                <div class="user-profile" style="display: flex; align-items: center; gap: 15px;">
+                    <span style="font-weight: 500;">{{ current_user.username }}</span>
+                    <a href="{{ url_for('logout') }}" class="btn-action" style="background-color: var(--accent-red);"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
+                </div>
+                {% endif %}
+            </header>
+
+            <!-- Flash Messages -->
+            {% with messages = get_flashed_messages() %}
+              {% if messages %}
+                <div class="flash-messages" style="margin-bottom: 20px;">
+                {% for message in messages %}
+                  <div class="alert" style="padding: 12px; background-color: #e0f2f1; color: #00796b; border-radius: 6px; margin-bottom: 10px; border: 1px solid #b2dfdb;">
+                      {{ message }}
+                  </div>
+                {% endfor %}
+                </div>
+              {% endif %}
+            {% endwith %}
+
+            {% block content %}{% endblock %}
+        </main>
+    </div>
+
+    {% block scripts %}{% endblock %}
+</body>
+</html>

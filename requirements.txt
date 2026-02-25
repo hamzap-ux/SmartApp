@@ -2,3 +2,5 @@ Flask
 pandas
 matplotlib
 torch
+Flask-Login
+boto3

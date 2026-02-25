@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+
+{% block title %}Subscriptions{% endblock %}
+{% block header_title %}Manage Subscriptions{% endblock %}
+
+{% block content %}
+<div class="lists-grid">
+    <div class="list-card">
+        <h2>Add New Subscription</h2>
+        <form action="{{ url_for('subscriptions') }}" method="POST">
+            <div class="form-group">
+                <label for="name">Subscription Name</label>
+                <input type="text" id="name" name="name" class="form-control" required placeholder="e.g., Netflix">
+            </div>
+            <div class="form-group">
+                <label for="provider">Provider</label>
+                <input type="text" id="provider" name="provider" class="form-control" placeholder="e.g., Netflix Inc.">
+            </div>
+            <div class="form-group">
+                <label for="amount">Amount ($)</label>
+                <input type="number" id="amount" name="amount" class="form-control" step="0.01" required placeholder="0.00">
+            </div>
+            <div class="form-group">
+                <label for="billing_period">Billing Period</label>
+                <select id="billing_period" name="billing_period" class="form-control" required>
+                    <option value="Monthly">Monthly</option>
+                    <option value="Yearly">Yearly</option>
+                    <option value="Weekly">Weekly</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="next_renewal">Next Renewal Date</label>
+                <input type="date" id="next_renewal" name="next_renewal" class="form-control" required>
+            </div>
+            <button type="submit" class="btn-submit">Save Subscription</button>
+        </form>
+    </div>
+
+    <div class="list-card">
+        <h2>Active Subscriptions</h2>
+        <ul class="activity-list">
+            {% if active_subs %}
+                {% for sub in active_subs %}
+                <li>
+                    <div class="activity-icon"><i class="fa-solid fa-repeat"></i></div>
+                    <div class="activity-details">
+                        <h4>{{ sub.name }}</h4>
+                        <p>Renews on {{ sub.next_renewal or 'N/A' }}</p>
+                    </div>
+                    <div class="activity-amount alert">-${{ "%.2f"|format(sub.amount) }}</div>
+                </li>
+                {% endfor %}
+            {% else %}
+                <li>
+                    <div class="activity-details">
+                        <p style="color: var(--text-muted);">No active subscriptions.</p>
+                    </div>
+                </li>
+            {% endif %}
+        </ul>
+    </div>
+</div>
+{% endblock %}
