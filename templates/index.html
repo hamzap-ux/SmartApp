@@ -10,7 +10,7 @@
         <div class="kpi-icon teal"><i class="fa-solid fa-money-bill-wave"></i></div>
         <div class="kpi-info">
             <h3>Total Spending</h3>
-            <p class="kpi-value">${{ "%.2f"|format(total_spending) }}</p>
+            <p class="kpi-value">MAD {{ "%.2f"|format(total_spending) }}</p>
             <span class="kpi-trend neutral">All time</span>
         </div>
     </div>
@@ -19,7 +19,7 @@
         <div class="kpi-info">
             <h3>Active Subscriptions</h3>
             <p class="kpi-value">{{ active_subs }}</p>
-            <span class="kpi-trend neutral">Monthly cost: ${{ "%.2f"|format(monthly_sub_cost) }}</span>
+            <span class="kpi-trend neutral">Monthly cost: MAD {{ "%.2f"|format(monthly_sub_cost) }}</span>
         </div>
     </div>
     <div class="kpi-card">
@@ -64,7 +64,7 @@
                         <h4>{{ sub.name }}</h4>
                         <p>Renews on {{ sub.next_renewal or 'N/A' }}</p>
                     </div>
-                    <div class="activity-amount alert">-${{ "%.2f"|format(sub.amount) }}</div>
+                    <div class="activity-amount alert">-MAD {{ "%.2f"|format(sub.amount) }}</div>
                 </li>
                 {% endfor %}
             {% else %}
@@ -90,7 +90,7 @@
                         <h4>{{ exp.description or exp.category }}</h4>
                         <p>{{ exp.date }}</p>
                     </div>
-                    <div class="activity-amount">-${{ "%.2f"|format(exp.amount) }}</div>
+                    <div class="activity-amount">-MAD {{ "%.2f"|format(exp.amount) }}</div>
                 </li>
                 {% endfor %}
             {% else %}

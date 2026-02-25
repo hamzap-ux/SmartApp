@@ -109,6 +109,28 @@ body {
     box-shadow: var(--shadow-sm);
 }
 
+/* Profile image in header */
+.profile-image {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid var(--accent-green-light);
+    box-shadow: var(--shadow-sm);
+}
+
+/* Logout button styled as dark green icon */
+.btn-logout {
+    background-color: var(--accent-green-dark) !important;
+    color: #fff !important;
+    padding: 8px;
+    border-radius: 8px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+.btn-logout i { font-size: 0.95rem; }
+
 /* KPI Grid */
 .kpi-grid {
     display: grid;

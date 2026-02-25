@@ -34,9 +34,10 @@
             <header class="top-header">
                 <h1>{% block header_title %}Dashboard Overview{% endblock %}</h1>
                 {% if current_user.is_authenticated %}
-                <div class="user-profile" style="display: flex; align-items: center; gap: 15px;">
-                    <span style="font-weight: 500;">{{ current_user.username }}</span>
-                    <a href="{{ url_for('logout') }}" class="btn-action" style="background-color: var(--accent-red);"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
+                <div class="user-profile" style="display: flex; align-items: center; gap: 12px;">
+                    {# Profile image: use user-specific image if exists, otherwise anonymous placeholder #}
+                    <img src="{{ url_for('static', filename=('img/profile_' + (current_user.id|string) + '.png')) }}" onerror="this.onerror=null;this.src='{{ url_for('static', filename='img/anonymous.svg') }}'" alt="Profile" class="profile-image">
+                    <a href="{{ url_for('logout') }}" class="btn-action btn-logout"><i class="fa-solid fa-right-from-bracket"></i></a>
                 </div>
                 {% endif %}
             </header>
