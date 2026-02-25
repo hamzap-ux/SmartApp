@@ -102,3 +102,10 @@ MyFinanceApp/
 └── assets/                        # Images, icons, CSS if web
     ├── logo.png
     └── styles.css
+
+
+# lacer app : 
+
+
+#   source .venv/bin/activate
+#   python3 main.py
