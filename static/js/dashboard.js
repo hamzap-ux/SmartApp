@@ -52,78 +52,70 @@ document.addEventListener('DOMContentLoaded', function() {
         const accentPurple = css.getPropertyValue('--accent-purple').trim() || '#6b5fa3';
         const gridColor = css.getPropertyValue('--border-color').trim() || '#e9e7e5';
 
-        const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-        const trendData = window.dashboardTrendData || {
-            labels: months.slice(0,6),
-            expenses: [1200, 1900, 1500, 1800, 1400, 2100],
-            subscriptions: [150, 150, 165, 165, 180, 180]
-        };
+        // controls
+        const monthsSelect = document.getElementById('trend-months');
+        const refreshBtn = document.getElementById('trend-refresh');
 
-        new Chart(trendCanvas.getContext('2d'), {
-            type: 'bar',
-            data: {
-                labels: trendData.labels,
-                datasets: [
-                    {
-                        label: 'Expenses',
-                        data: trendData.expenses,
-                        backgroundColor: accentGreen,
-                        borderRadius: 6
-                    },
-                    {
-                        label: 'Subscriptions',
-                        data: trendData.subscriptions,
-                        backgroundColor: accentPurple,
-                        borderRadius: 6
+        function fetchAndRender(monthsCount) {
+            fetch(`/api/trends?months=${monthsCount}`)
+                .then(r => r.json())
+                .then(trendData => {
+                    const datasets = [
+                        { label: 'Expenses', data: trendData.expenses, backgroundColor: accentGreen, borderRadius: 6 },
+                        { label: 'Subscriptions', data: trendData.subscriptions, backgroundColor: accentPurple, borderRadius: 6 }
+                    ];
+                    if (trendData.incomes && trendData.incomes.some(v => v > 0)) {
+                        datasets.push({ label: 'Incomes', data: trendData.incomes, backgroundColor: '#1e88e5', borderRadius: 6 });
                     }
-                ]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        position: 'top',
-                        align: 'end',
-                        labels: {
-                            usePointStyle: true,
-                            pointStyle: 'circle'
-                        }
-                    },
-                    tooltip: {
-                        callbacks: {
-                            label: function(context) {
-                                const v = context.parsed.y || 0;
-                                return context.dataset.label + ': MAD ' + v.toLocaleString();
-                            }
-                        }
-                    }
-                },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        grid: {
-                            color: gridColor,
-                            drawBorder: false
+
+                    if (window._trendChart) window._trendChart.destroy();
+
+                    window._trendChart = new Chart(trendCanvas.getContext('2d'), {
+                        type: 'bar',
+                        data: {
+                            labels: trendData.labels,
+                            datasets: datasets
                         },
-                        ticks: {
-                            callback: function(value) {
-                                // Format tick values as Moroccan Dirham (MAD)
-                                if (Number.isInteger(value)) {
-                                    return 'MAD ' + value.toLocaleString();
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: {
+                                    position: 'top',
+                                    align: 'end',
+                                    labels: { usePointStyle: true, pointStyle: 'circle' }
+                                },
+                                tooltip: {
+                                    callbacks: {
+                                        label: function(context) {
+                                            const v = context.parsed.y || 0;
+                                            return context.dataset.label + ': MAD ' + v.toLocaleString();
+                                        }
+                                    }
                                 }
-                                return value;
+                            },
+                            scales: {
+                                y: {
+                                    beginAtZero: true,
+                                    grid: { color: gridColor, drawBorder: false },
+                                    ticks: {
+                                        callback: function(value) {
+                                            if (Number.isInteger(value)) return 'MAD ' + value.toLocaleString();
+                                            return value;
+                                        }
+                                    }
+                                },
+                                x: { grid: { display: false, drawBorder: false } }
                             }
                         }
-                    },
-                    x: {
-                        grid: {
-                            display: false,
-                            drawBorder: false
-                        }
-                    }
-                }
-            }
-        });
+                    });
+                })
+                .catch(err => console.error('Failed to load trends', err));
+        }
+
+        // initial load
+        fetchAndRender(monthsSelect ? monthsSelect.value : 6);
+        if (monthsSelect) monthsSelect.addEventListener('change', function() { fetchAndRender(this.value); });
+        if (refreshBtn) refreshBtn.addEventListener('click', function(e) { e.preventDefault(); fetchAndRender(monthsSelect ? monthsSelect.value : 6); });
     }
 });

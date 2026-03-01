@@ -30,6 +30,14 @@
             <span class="kpi-trend neutral">Pending reminders</span>
         </div>
     </div>
+    <div class="kpi-card">
+        <div class="kpi-icon blue"><i class="fa-solid fa-wallet"></i></div>
+        <div class="kpi-info">
+            <h3>Wallet Balance</h3>
+            <p class="kpi-value">MAD {{ "%.2f"|format(wallet_balance) }}</p>
+            <span class="kpi-trend neutral">Income - Expenses</span>
+        </div>
+    </div>
 </section>
 
 <!-- Charts Section -->
@@ -42,6 +50,16 @@
     </div>
     <div class="chart-card">
         <h2>Monthly Trends</h2>
+        <div class="chart-controls" style="display:flex;gap:8px;align-items:center;margin-bottom:8px;">
+            <label for="trend-months">Months</label>
+            <select id="trend-months" class="form-control" style="width:90px;">
+                <option value="3">3</option>
+                <option value="6" selected>6</option>
+                <option value="12">12</option>
+            </select>
+            <button id="trend-refresh" class="btn-action" style="margin-left:8px;"><i class="fa-solid fa-arrows-rotate"></i> Refresh</button>
+            <a href="{{ url_for('incomes') }}" class="btn-action" style="margin-left:auto;"><i class="fa-solid fa-wallet"></i> Wallet</a>
+        </div>
         <div class="chart-container">
             <canvas id="trendBarChart"></canvas>
         </div>

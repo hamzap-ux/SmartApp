@@ -109,3 +109,12 @@ MyFinanceApp/
 
 #   source .venv/bin/activate
 #   python3 main.py
+
+## Development: start with auto-reload once
+You can start the app in development mode (auto-reload on code/template changes) with a single command that sets the dev flag once:
+
+```bash
+./run_dev.sh
+```
+
+This sets `SMARTAPP_DEV=1` for the process so `main.py` enables Flask's reloader. It's safe for local development only; do not enable in production.

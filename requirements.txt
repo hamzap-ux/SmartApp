@@ -4,3 +4,4 @@ matplotlib
 torch
 Flask-Login
 boto3
+python-dateutil

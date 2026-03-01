@@ -168,6 +168,16 @@ def index():
         'category_amounts': category_amounts,
     }
 
+    # compute wallet balance (sum incomes - sum expenses)
+    conn = sqlite3.connect(str(DB_PATH))
+    conn.row_factory = sqlite3.Row
+    cur = conn.cursor()
+    cur.execute("SELECT SUM(amount) as total FROM incomes WHERE user_id = ?", (uid,))
+    total_income = cur.fetchone()['total'] or 0.0
+    conn.close()
+
+    wallet_balance = (total_income or 0.0) - (total_spending or 0.0)
+
     return render_template('index.html',
                            total_spending=total_spending,
                            active_subs=active_subs,
@@ -175,7 +185,74 @@ def index():
                            upcoming_bills=upcoming_bills,
                            recent_expenses=recent_expenses,
                            upcoming_renewals=upcoming_renewals,
-                           chart_data=chart_data)
+                           chart_data=chart_data,
+                           wallet_balance=wallet_balance)
+
+
+
+@app.route('/api/trends')
+@login_required
+def api_trends():
+    # returns monthly aggregated data for expenses, subscriptions and incomes
+    try:
+        months = int(request.args.get('months', 6))
+    except ValueError:
+        months = 6
+
+    if months < 1:
+        months = 6
+
+    uid = current_user.id
+    from datetime import date, datetime
+    from dateutil.relativedelta import relativedelta
+
+    today = date.today()
+    # build list of months (YYYY-MM) from oldest to newest
+    labels = []
+    month_keys = []
+    for i in range(months-1, -1, -1):
+        m = today - relativedelta(months=i)
+        key = m.strftime('%Y-%m')
+        month_keys.append(key)
+        labels.append(m.strftime('%b %Y'))
+
+    conn = sqlite3.connect(str(DB_PATH))
+    conn.row_factory = sqlite3.Row
+    cur = conn.cursor()
+
+    # expenses by month
+    cur.execute("""
+        SELECT strftime('%Y-%m', date) as ym, SUM(amount) as total
+        FROM expenses
+        WHERE user_id = ? AND date IS NOT NULL
+        GROUP BY ym
+    """, (uid,))
+    rows = {r['ym']: r['total'] for r in cur.fetchall()}
+    expenses = [rows.get(k, 0.0) for k in month_keys]
+
+    # incomes by month
+    cur.execute("""
+        SELECT strftime('%Y-%m', date) as ym, SUM(amount) as total
+        FROM incomes
+        WHERE user_id = ? AND date IS NOT NULL
+        GROUP BY ym
+    """, (uid,))
+    rows = {r['ym']: r['total'] for r in cur.fetchall()}
+    incomes = [rows.get(k, 0.0) for k in month_keys]
+
+    # subscriptions: use monthly total of active subscriptions
+    cur.execute("SELECT SUM(amount) as total FROM subscriptions WHERE active = 1 AND user_id = ?", (uid,))
+    sub_total = cur.fetchone()['total'] or 0.0
+    subscriptions = [sub_total for _ in month_keys]
+
+    conn.close()
+
+    return jsonify({
+        'labels': labels,
+        'expenses': expenses,
+        'subscriptions': subscriptions,
+        'incomes': incomes
+    })
 
 @app.route('/subscriptions', methods=['GET', 'POST'])
 @login_required
@@ -359,4 +436,6 @@ def tables():
     return jsonify({'tables': rows})
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000)
+    # Enable debug/reloader when SMARTAPP_DEV is set to 1 (safe for local dev only)
+    debug_mode = os.environ.get('SMARTAPP_DEV', '0').lower() in ('1', 'true', 'yes')
+    app.run(host='0.0.0.0', port=5000, debug=debug_mode)
