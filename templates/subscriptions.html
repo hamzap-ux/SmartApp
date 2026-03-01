@@ -6,34 +6,99 @@
 {% block content %}
 <div class="lists-grid">
     <div class="list-card">
-        <h2>Add New Subscription</h2>
-        <form action="{{ url_for('subscriptions') }}" method="POST">
+        <h2>Subscription Action</h2>
+        <form action="{{ url_for('subscriptions') }}" method="POST" id="sub-form">
             <div class="form-group">
-                <label for="name">Subscription Name</label>
-                <input type="text" id="name" name="name" class="form-control" required placeholder="e.g., Netflix">
-            </div>
-            <div class="form-group">
-                <label for="provider">Provider</label>
-                <input type="text" id="provider" name="provider" class="form-control" placeholder="e.g., Netflix Inc.">
-            </div>
-            <div class="form-group">
-                <label for="amount">Amount ($)</label>
-                <input type="number" id="amount" name="amount" class="form-control" step="0.01" required placeholder="0.00">
-            </div>
-            <div class="form-group">
-                <label for="billing_period">Billing Period</label>
-                <select id="billing_period" name="billing_period" class="form-control" required>
-                    <option value="Monthly">Monthly</option>
-                    <option value="Yearly">Yearly</option>
-                    <option value="Weekly">Weekly</option>
+                <label for="action">Action</label>
+                <select id="action" name="action" class="form-control" required>
+                    <option value="add">Add</option>
+                    <option value="modify">Modify</option>
+                    <option value="delete">Delete</option>
                 </select>
             </div>
-            <div class="form-group">
-                <label for="next_renewal">Next Renewal Date</label>
-                <input type="date" id="next_renewal" name="next_renewal" class="form-control" required>
+
+            <div class="form-group" id="existing-item-group" style="display:none;">
+                <label for="item_id">Choose Subscription</label>
+                <select id="item_id" name="item_id" class="form-control">
+                    <option value="">-- select --</option>
+                    {% for sub in active_subs %}
+                    <option value="{{ sub.id }}">{{ sub.name }} ({{ sub.provider or 'N/A' }})</option>
+                    {% endfor %}
+                </select>
             </div>
-            <button type="submit" class="btn-submit">Save Subscription</button>
+
+            <div id="fields">
+                <div class="form-group">
+                    <label for="name">Subscription Name</label>
+                    <input type="text" id="name" name="name" class="form-control" placeholder="e.g., Netflix">
+                </div>
+                <div class="form-group">
+                    <label for="provider">Provider</label>
+                    <input type="text" id="provider" name="provider" class="form-control" placeholder="e.g., Netflix Inc.">
+                </div>
+                <div class="form-group">
+                    <label for="amount">Amount ($)</label>
+                    <input type="number" id="amount" name="amount" class="form-control" step="0.01" placeholder="0.00">
+                </div>
+                <div class="form-group">
+                    <label for="billing_period">Billing Period</label>
+                    <select id="billing_period" name="billing_period" class="form-control">
+                        <option value="Monthly">Monthly</option>
+                        <option value="Yearly">Yearly</option>
+                        <option value="Weekly">Weekly</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="next_renewal">Next Renewal Date</label>
+                    <input type="date" id="next_renewal" name="next_renewal" class="form-control">
+                </div>
+            </div>
+
+            <button type="submit" class="btn-submit" id="submit-btn">Save</button>
         </form>
+
+        <script>
+            const subs = {{ active_subs|tojson }};
+            const actionSelect = document.getElementById('action');
+            const existingGroup = document.getElementById('existing-item-group');
+            const itemSelect = document.getElementById('item_id');
+            const submitBtn = document.getElementById('submit-btn');
+
+            function setMode() {
+                const mode = actionSelect.value;
+                if (mode === 'add') {
+                    existingGroup.style.display = 'none';
+                    submitBtn.textContent = 'Add Subscription';
+                    // enable fields
+                    document.querySelectorAll('#fields input, #fields select').forEach(e => e.disabled = false);
+                } else if (mode === 'modify') {
+                    existingGroup.style.display = '';
+                    submitBtn.textContent = 'Modify Subscription';
+                    document.querySelectorAll('#fields input, #fields select').forEach(e => e.disabled = false);
+                } else { // delete
+                    existingGroup.style.display = '';
+                    submitBtn.textContent = 'Delete Subscription';
+                    // disable fields for delete
+                    document.querySelectorAll('#fields input, #fields select').forEach(e => e.disabled = true);
+                }
+            }
+
+            actionSelect.addEventListener('change', setMode);
+            itemSelect.addEventListener('change', function() {
+                const id = this.value;
+                const found = subs.find(s => String(s.id) === String(id));
+                if (found) {
+                    document.getElementById('name').value = found.name || '';
+                    document.getElementById('provider').value = found.provider || '';
+                    document.getElementById('amount').value = found.amount || '';
+                    document.getElementById('billing_period').value = found.billing_period || 'Monthly';
+                    document.getElementById('next_renewal').value = found.next_renewal || '';
+                }
+            });
+
+            // init
+            setMode();
+        </script>
     </div>
 
     <div class="list-card">

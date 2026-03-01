@@ -44,3 +44,15 @@ CREATE TABLE IF NOT EXISTS reminders (
     FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE,
     FOREIGN KEY(subscription_id) REFERENCES subscriptions(id) ON DELETE SET NULL
 );
+
+-- Incomes table: user can add income entries (wallet)
+CREATE TABLE IF NOT EXISTS incomes (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL,
+    source TEXT,
+    amount REAL NOT NULL,
+    currency TEXT DEFAULT 'USD',
+    date DATE DEFAULT (date('now')),
+    created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE
+);

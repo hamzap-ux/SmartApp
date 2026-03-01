@@ -186,17 +186,35 @@ def subscriptions():
     uid = current_user.id
 
     if request.method == 'POST':
-        name = request.form.get('name')
-        provider = request.form.get('provider')
-        amount = request.form.get('amount')
-        billing_period = request.form.get('billing_period')
-        next_renewal = request.form.get('next_renewal')
+        action = request.form.get('action', 'add')
+        item_id = request.form.get('item_id')
+        if action == 'add':
+            name = request.form.get('name')
+            provider = request.form.get('provider')
+            amount = request.form.get('amount') or 0
+            billing_period = request.form.get('billing_period')
+            next_renewal = request.form.get('next_renewal')
 
-        cur.execute("""
-            INSERT INTO subscriptions (user_id, name, provider, amount, billing_period, next_renewal)
-            VALUES (?, ?, ?, ?, ?, ?)
-        """, (uid, name, provider, amount, billing_period, next_renewal))
-        conn.commit()
+            cur.execute("""
+                INSERT INTO subscriptions (user_id, name, provider, amount, billing_period, next_renewal)
+                VALUES (?, ?, ?, ?, ?, ?)
+            """, (uid, name, provider, amount, billing_period, next_renewal))
+            conn.commit()
+        elif action == 'modify' and item_id:
+            name = request.form.get('name')
+            provider = request.form.get('provider')
+            amount = request.form.get('amount') or 0
+            billing_period = request.form.get('billing_period')
+            next_renewal = request.form.get('next_renewal')
+            cur.execute("""
+                UPDATE subscriptions SET name = ?, provider = ?, amount = ?, billing_period = ?, next_renewal = ?
+                WHERE id = ? AND user_id = ?
+            """, (name, provider, amount, billing_period, next_renewal, item_id, uid))
+            conn.commit()
+        elif action == 'delete' and item_id:
+            # soft delete
+            cur.execute("UPDATE subscriptions SET active = 0 WHERE id = ? AND user_id = ?", (item_id, uid))
+            conn.commit()
         return redirect(url_for('subscriptions'))
 
     cur.execute("SELECT * FROM subscriptions WHERE active = 1 AND user_id = ? ORDER BY next_renewal ASC", (uid,))
@@ -214,16 +232,31 @@ def expenses():
     uid = current_user.id
 
     if request.method == 'POST':
-        description = request.form.get('description')
-        category = request.form.get('category')
-        amount = request.form.get('amount')
-        date = request.form.get('date')
-
-        cur.execute("""
-            INSERT INTO expenses (user_id, description, category, amount, date)
-            VALUES (?, ?, ?, ?, ?)
-        """, (uid, description, category, amount, date))
-        conn.commit()
+        action = request.form.get('action', 'add')
+        item_id = request.form.get('item_id')
+        if action == 'add':
+            description = request.form.get('description')
+            category = request.form.get('category')
+            amount = request.form.get('amount')
+            date = request.form.get('date')
+            cur.execute("""
+                INSERT INTO expenses (user_id, description, category, amount, date)
+                VALUES (?, ?, ?, ?, ?)
+            """, (uid, description, category, amount, date))
+            conn.commit()
+        elif action == 'modify' and item_id:
+            description = request.form.get('description')
+            category = request.form.get('category')
+            amount = request.form.get('amount')
+            date = request.form.get('date')
+            cur.execute("""
+                UPDATE expenses SET description = ?, category = ?, amount = ?, date = ?
+                WHERE id = ? AND user_id = ?
+            """, (description, category, amount, date, item_id, uid))
+            conn.commit()
+        elif action == 'delete' and item_id:
+            cur.execute("DELETE FROM expenses WHERE id = ? AND user_id = ?", (item_id, uid))
+            conn.commit()
         return redirect(url_for('expenses'))
 
     cur.execute("SELECT * FROM expenses WHERE user_id = ? ORDER BY date DESC", (uid,))
@@ -231,6 +264,68 @@ def expenses():
     conn.close()
 
     return render_template('expenses.html', recent_expenses=recent_expenses)
+
+
+@app.route('/incomes', methods=['GET', 'POST'])
+@login_required
+def incomes():
+    # ensure incomes table exists (safe if DB already initialized)
+    conn = sqlite3.connect(str(DB_PATH))
+    conn.row_factory = sqlite3.Row
+    cur = conn.cursor()
+    cur.execute('''
+        CREATE TABLE IF NOT EXISTS incomes (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER NOT NULL,
+            source TEXT,
+            amount REAL NOT NULL,
+            currency TEXT DEFAULT 'USD',
+            date DATE DEFAULT (date('now')),
+            created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE
+        )
+    ''')
+    conn.commit()
+
+    uid = current_user.id
+    if request.method == 'POST':
+        action = request.form.get('action', 'add')
+        item_id = request.form.get('item_id')
+        if action == 'add':
+            source = request.form.get('source')
+            amount = request.form.get('amount') or 0
+            date = request.form.get('date')
+            cur.execute("""
+                INSERT INTO incomes (user_id, source, amount, date)
+                VALUES (?, ?, ?, ?)
+            """, (uid, source, amount, date))
+            conn.commit()
+        elif action == 'modify' and item_id:
+            source = request.form.get('source')
+            amount = request.form.get('amount') or 0
+            date = request.form.get('date')
+            cur.execute("""
+                UPDATE incomes SET source = ?, amount = ?, date = ?
+                WHERE id = ? AND user_id = ?
+            """, (source, amount, date, item_id, uid))
+            conn.commit()
+        elif action == 'delete' and item_id:
+            cur.execute("DELETE FROM incomes WHERE id = ? AND user_id = ?", (item_id, uid))
+            conn.commit()
+        return redirect(url_for('incomes'))
+
+    # fetch recent incomes and wallet balance
+    cur.execute("SELECT * FROM incomes WHERE user_id = ? ORDER BY date DESC LIMIT 10", (uid,))
+    recent_incomes = [dict(row) for row in cur.fetchall()]
+    cur.execute("SELECT SUM(amount) as total FROM incomes WHERE user_id = ?", (uid,))
+    total_income = cur.fetchone()['total'] or 0.0
+    # optionally subtract total expenses to present wallet balance
+    cur.execute("SELECT SUM(amount) as total FROM expenses WHERE user_id = ?", (uid,))
+    total_expenses = cur.fetchone()['total'] or 0.0
+    wallet_balance = (total_income or 0.0) - (total_expenses or 0.0)
+
+    conn.close()
+    return render_template('incomes.html', recent_incomes=recent_incomes, wallet_balance=wallet_balance)
 
 @app.route('/analytics')
 @login_required

@@ -1,13 +1,13 @@
 {% extends "base.html" %}
 
-{% block title %}Expenses{% endblock %}
-{% block header_title %}Manage Expenses{% endblock %}
+{% block title %}Incomes{% endblock %}
+{% block header_title %}My Wallet — Incomes{% endblock %}
 
 {% block content %}
 <div class="lists-grid">
     <div class="list-card">
-        <h2>Expense Action</h2>
-        <form action="{{ url_for('expenses') }}" method="POST" id="exp-form">
+        <h2>Income Action</h2>
+        <form action="{{ url_for('incomes') }}" method="POST" id="inc-form">
             <div class="form-group">
                 <label for="action">Action</label>
                 <select id="action" name="action" class="form-control" required>
@@ -18,30 +18,19 @@
             </div>
 
             <div class="form-group" id="existing-item-group" style="display:none;">
-                <label for="item_id">Choose Expense</label>
+                <label for="item_id">Choose Income</label>
                 <select id="item_id" name="item_id" class="form-control">
                     <option value="">-- select --</option>
-                    {% for exp in recent_expenses %}
-                    <option value="{{ exp.id }}">{{ exp.description or exp.category }} ({{ exp.date }})</option>
+                    {% for inc in recent_incomes %}
+                    <option value="{{ inc.id }}">{{ inc.source or 'Income' }} ({{ inc.date }})</option>
                     {% endfor %}
                 </select>
             </div>
 
             <div id="fields">
                 <div class="form-group">
-                    <label for="description">Description</label>
-                    <input type="text" id="description" name="description" class="form-control" placeholder="e.g., Groceries">
-                </div>
-                <div class="form-group">
-                    <label for="category">Category</label>
-                    <select id="category" name="category" class="form-control">
-                        <option value="Housing">Housing</option>
-                        <option value="Food">Food</option>
-                        <option value="Transport">Transport</option>
-                        <option value="Entertainment">Entertainment</option>
-                        <option value="Utilities">Utilities</option>
-                        <option value="Other">Other</option>
-                    </select>
+                    <label for="source">Source</label>
+                    <input type="text" id="source" name="source" class="form-control" placeholder="e.g., Salary, Wallet top-up">
                 </div>
                 <div class="form-group">
                     <label for="amount">Amount ($)</label>
@@ -57,7 +46,7 @@
         </form>
 
         <script>
-            const exps = {{ recent_expenses|tojson }};
+            const incs = {{ recent_incomes|tojson }};
             const actionSelect = document.getElementById('action');
             const existingGroup = document.getElementById('existing-item-group');
             const itemSelect = document.getElementById('item_id');
@@ -67,15 +56,15 @@
                 const mode = actionSelect.value;
                 if (mode === 'add') {
                     existingGroup.style.display = 'none';
-                    submitBtn.textContent = 'Add Expense';
+                    submitBtn.textContent = 'Add Income';
                     document.querySelectorAll('#fields input, #fields select').forEach(e => e.disabled = false);
                 } else if (mode === 'modify') {
                     existingGroup.style.display = '';
-                    submitBtn.textContent = 'Modify Expense';
+                    submitBtn.textContent = 'Modify Income';
                     document.querySelectorAll('#fields input, #fields select').forEach(e => e.disabled = false);
                 } else {
                     existingGroup.style.display = '';
-                    submitBtn.textContent = 'Delete Expense';
+                    submitBtn.textContent = 'Delete Income';
                     document.querySelectorAll('#fields input, #fields select').forEach(e => e.disabled = true);
                 }
             }
@@ -83,10 +72,9 @@
             actionSelect.addEventListener('change', setMode);
             itemSelect.addEventListener('change', function() {
                 const id = this.value;
-                const found = exps.find(x => String(x.id) === String(id));
+                const found = incs.find(x => String(x.id) === String(id));
                 if (found) {
-                    document.getElementById('description').value = found.description || '';
-                    document.getElementById('category').value = found.category || 'Other';
+                    document.getElementById('source').value = found.source || '';
                     document.getElementById('amount').value = found.amount || '';
                     document.getElementById('date').value = found.date || '';
                 }
@@ -97,23 +85,26 @@
     </div>
 
     <div class="list-card">
-        <h2>Recent Expenses</h2>
+        <h2>Wallet Balance</h2>
+        <div style="font-size:1.6rem; font-weight:600; margin-bottom:12px; color:var(--primary);">${{ "%.2f"|format(wallet_balance) }}</div>
+
+        <h3 style="margin-top:10px;">Recent Incomes</h3>
         <ul class="activity-list">
-            {% if recent_expenses %}
-                {% for exp in recent_expenses %}
+            {% if recent_incomes %}
+                {% for inc in recent_incomes %}
                 <li>
-                    <div class="activity-icon"><i class="fa-solid fa-cart-shopping"></i></div>
+                    <div class="activity-icon"><i class="fa-solid fa-circle-dollar-to-slot"></i></div>
                     <div class="activity-details">
-                        <h4>{{ exp.description or exp.category }}</h4>
-                        <p>{{ exp.date }}</p>
+                        <h4>{{ inc.source or 'Income' }}</h4>
+                        <p>{{ inc.date }}</p>
                     </div>
-                    <div class="activity-amount">-${{ "%.2f"|format(exp.amount) }}</div>
+                    <div class="activity-amount">+${{ "%.2f"|format(inc.amount) }}</div>
                 </li>
                 {% endfor %}
             {% else %}
                 <li>
                     <div class="activity-details">
-                        <p style="color: var(--text-muted);">No recent expenses.</p>
+                        <p style="color: var(--text-muted);">No incomes recorded yet.</p>
                     </div>
                 </li>
             {% endif %}

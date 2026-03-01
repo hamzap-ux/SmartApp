@@ -21,6 +21,7 @@
             <nav class="nav-menu">
                 <a href="{{ url_for('index') }}" class="nav-item {% if request.endpoint == 'index' %}active{% endif %}"><i class="fa-solid fa-chart-pie"></i> Dashboard</a>
                 <a href="{{ url_for('subscriptions') }}" class="nav-item {% if request.endpoint == 'subscriptions' %}active{% endif %}"><i class="fa-solid fa-repeat"></i> Subscriptions</a>
+                <a href="{{ url_for('incomes') }}" class="nav-item {% if request.endpoint == 'incomes' %}active{% endif %}"><i class="fa-solid fa-wallet"></i> Incomes</a>
                 <a href="{{ url_for('expenses') }}" class="nav-item {% if request.endpoint == 'expenses' %}active{% endif %}"><i class="fa-solid fa-receipt"></i> Expenses</a>
                 <a href="{{ url_for('analytics') }}" class="nav-item {% if request.endpoint == 'analytics' %}active{% endif %}"><i class="fa-solid fa-chart-line"></i> Analytics</a>
                 <a href="{{ url_for('reminders') }}" class="nav-item {% if request.endpoint == 'reminders' %}active{% endif %}"><i class="fa-solid fa-bell"></i> Reminders</a>
