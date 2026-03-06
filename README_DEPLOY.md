@@ -16,6 +16,11 @@ Ce guide couvre le déploiement d'une instance complète de SmartApp (Flask) en 
 - `SECRET_KEY` (fortement recommandé).
 - `AWS_REGION`, `SENDER_EMAIL` si vous utilisez l'envoi d'emails via AWS SES.
 - Toute autre clé (`SENDER_EMAIL`, `AWS_*`, etc.).
+ 
+Secrets / Tokens supplémentaires pour CI
+- `GHCR_PAT` (optionnel) : Personal Access Token avec `write:packages` scope — utilisé en fallback pour publier sur GitHub Container Registry si `GITHUB_TOKEN` est restreint.
+- `DOCKERHUB_USERNAME` et `DOCKERHUB_TOKEN` : requis pour pousser sur Docker Hub via le workflow `dockerhub-publish`.
+- `GH_PAGES_PAT` (optionnel) : Personal Access Token avec `repo` scope — utilisé pour publier sur GitHub Pages si le `GITHUB_TOKEN` n'a pas les droits d'écriture.
 
 4) Déploiement rapide sur Render
 - Connectez votre repository à Render (New -> Web Service).
