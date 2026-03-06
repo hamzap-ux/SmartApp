@@ -1,7 +1,9 @@
 document.addEventListener('DOMContentLoaded', function() {
     // Chart.js Defaults
     Chart.defaults.font.family = "'Segoe UI', Roboto, Helvetica, Arial, sans-serif";
-    Chart.defaults.color = '#777';
+    // use CSS variable for chart text color so dark mode applies
+    const _css = getComputedStyle(document.documentElement);
+    Chart.defaults.color = (_css.getPropertyValue('--text-muted') || '#777').trim();
 
     // 1. Category Pie Chart
     const ctxPie = document.getElementById('categoryPieChart');
@@ -14,13 +16,16 @@ document.addEventListener('DOMContentLoaded', function() {
                 labels: chartData.categories.length ? chartData.categories : ['No Data'],
                 datasets: [{
                     data: chartData.category_amounts.length ? chartData.category_amounts : [1],
-                    backgroundColor: chartData.categories.length ? [
-                        '#009688', // Teal
-                        '#4caf50', // Green
-                        '#ff9800', // Orange
-                        '#673ab7', // Purple
-                        '#f44336'  // Red
-                    ] : ['#e0e0e0'],
+                    backgroundColor: chartData.categories.length ? (
+                        // map to theme variables where possible, fallback to sensible defaults
+                        [
+                            _css.getPropertyValue('--accent-green').trim() || '#009688',
+                            _css.getPropertyValue('--accent-green-dark').trim() || '#4caf50',
+                            _css.getPropertyValue('--positive').trim() || '#ff9800',
+                            _css.getPropertyValue('--accent-purple').trim() || '#673ab7',
+                            _css.getPropertyValue('--negative').trim() || '#f44336'
+                        ]
+                    ) : ['#e0e0e0'],
                     borderWidth: 0,
                     hoverOffset: 4
                 }]
@@ -48,9 +53,10 @@ document.addEventListener('DOMContentLoaded', function() {
     if (trendCanvas) {
         // Read color variables from CSS to keep palette consistent
         const css = getComputedStyle(document.documentElement);
-        const accentGreen = css.getPropertyValue('--accent-green').trim() || '#7aa57a';
-        const accentPurple = css.getPropertyValue('--accent-purple').trim() || '#6b5fa3';
-        const gridColor = css.getPropertyValue('--border-color').trim() || '#e9e7e5';
+    const accentGreen = css.getPropertyValue('--accent-green').trim() || '#7aa57a';
+    const accentPurple = css.getPropertyValue('--accent-purple').trim() || '#6b5fa3';
+    const gridColor = css.getPropertyValue('--border-color').trim() || '#e9e7e5';
+    const accentBlue = css.getPropertyValue('--accent-2').trim() || '#1e88e5';
 
         // controls
         const monthsSelect = document.getElementById('trend-months');
@@ -65,7 +71,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         { label: 'Subscriptions', data: trendData.subscriptions, backgroundColor: accentPurple, borderRadius: 6 }
                     ];
                     if (trendData.incomes && trendData.incomes.some(v => v > 0)) {
-                        datasets.push({ label: 'Incomes', data: trendData.incomes, backgroundColor: '#1e88e5', borderRadius: 6 });
+                        datasets.push({ label: 'Incomes', data: trendData.incomes, backgroundColor: accentBlue, borderRadius: 6 });
                     }
 
                     if (window._trendChart) window._trendChart.destroy();

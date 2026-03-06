@@ -435,6 +435,13 @@ def tables():
     conn.close()
     return jsonify({'tables': rows})
 
+
+@app.route('/settings/account')
+@login_required
+def settings_account():
+    # Render a dedicated account settings page (same fields as inline pane)
+    return render_template('account.html')
+
 if __name__ == '__main__':
     # Enable debug/reloader when SMARTAPP_DEV is set to 1 (safe for local dev only)
     debug_mode = os.environ.get('SMARTAPP_DEV', '0').lower() in ('1', 'true', 'yes')

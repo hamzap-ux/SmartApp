@@ -19,13 +19,13 @@
             <label for="password">Password</label>
             <input type="password" id="password" name="password" class="form-control" required>
         </div>
-        <p style="font-size: 0.9em; color: #666; margin-bottom: 15px;">
+        <p class="muted-small" style="font-size:0.9em; margin-bottom:15px;">
             A welcome email will be sent to your address upon successful registration.
         </p>
         <button type="submit" class="btn-submit">Register</button>
     </form>
     <p style="text-align: center; margin-top: 15px;">
-        Already have an account? <a href="{{ url_for('login') }}" style="color: var(--accent-teal);">Login here</a>
+        Already have an account? <a href="{{ url_for('login') }}" style="color: var(--accent-green-dark);">Login here</a>
     </p>
 </div>
 {% endblock %}

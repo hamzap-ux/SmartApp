@@ -1,11 +1,171 @@
-{% extends "base.html" %}
-
+{% extends 'base.html' %}
 {% block title %}Settings{% endblock %}
-{% block header_title %}Account Settings{% endblock %}
+{% block header_title %}Settings{% endblock %}
 
 {% block content %}
-<div class="chart-card">
-    <h2>Settings</h2>
-    <p>This page will allow you to change your preferences, theme, and account details.</p>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/settings.css') }}">
+<div class="settings-page container">
+    <div class="settings-header">
+        <h1>Settings</h1>
+        <p class="muted">Manage your account, preferences and data</p>
+        <div style="margin-left:auto; display:flex; gap:12px; align-items:center;">
+            <button class="btn secondary save-settings-btn" id="save-settings">Enregistrer</button>
+        </div>
+    </div>
+
+    <div class="cards-grid">
+        <!-- Account & Security card -->
+        <div class="card card-clickable" id="card-account-security" data-target="account-security">
+            <div class="card-icon">🔒</div>
+            <div class="card-body">
+                <h3>Account & Security</h3>
+                <p class="muted">Profile, passwords and two-factor authentication.</p>
+            </div>
+            <div class="card-action">▶</div>
+        </div>
+
+        <!-- Appearance card -->
+        <div class="card">
+            <div class="card-icon">🎨</div>
+            <div class="card-body">
+                <h3>Appearance</h3>
+                <p class="muted">Choose light or dark theme.</p>
+                <div class="control-row theme-controls">
+                    <label class="radio">
+                        <input type="radio" name="theme" value="light" checked>
+                        <span>Light</span>
+                    </label>
+                    <label class="radio">
+                        <input type="radio" name="theme" value="dark">
+                        <span>Dark</span>
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <!-- Preferences card -->
+        <div class="card">
+            <div class="card-icon">⚙️</div>
+            <div class="card-body">
+                <h3>Preferences</h3>
+                <p class="muted">Currency, language and date format.</p>
+                <div class="control-column">
+                    <label>Currency
+                        <select id="pref-currency">
+                            <option value="USD">USD</option>
+                            <option value="EUR">EUR</option>
+                            <option value="MAD">MAD</option>
+                        </select>
+                    </label>
+                    <label>Language
+                        <select id="pref-language">
+                            <option value="en">English</option>
+                            <option value="fr">Français</option>
+                            <option value="ar">العربية</option>
+                        </select>
+                    </label>
+                    <label>Date format
+                        <select id="pref-date">
+                            <option value="YYYY-MM-DD">YYYY-MM-DD</option>
+                            <option value="DD/MM/YYYY">DD/MM/YYYY</option>
+                            <option value="MM/DD/YYYY">MM/DD/YYYY</option>
+                        </select>
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <!-- Notifications card -->
+        <div class="card">
+            <div class="card-icon">🔔</div>
+            <div class="card-body">
+                <h3>Notifications</h3>
+                <p class="muted">Control email and in-app alerts.</p>
+                <div class="control-column toggles">
+                    <label class="toggle-row">Payment reminders <input type="checkbox" id="notif-payments" checked></label>
+                    <label class="toggle-row">Subscription renewals <input type="checkbox" id="notif-subscriptions" checked></label>
+                    <label class="toggle-row">Monthly analytics email <input type="checkbox" id="notif-monthly"></label>
+                </div>
+            </div>
+        </div>
+
+        <!-- Data Management card -->
+        <div class="card">
+            <div class="card-icon">📁</div>
+            <div class="card-body">
+                <h3>Data Management</h3>
+                <p class="muted">Export, import or download backup of your data.</p>
+                <div class="control-row buttons">
+                    <button class="btn secondary" id="export-data">Export Data</button>
+                    <label class="btn upload">
+                        Import Data
+                        <input type="file" id="import-file" style="display:none">
+                    </label>
+                    <button class="btn" id="download-backup">Download Backup</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Expanded Account & Security panel (hidden by default) -->
+    <div class="panel" id="panel-account-security" aria-hidden="true">
+        <div class="panel-sidebar">
+            <ul class="panel-menu">
+                <li class="active" data-pane="account">Account</li>
+                <li data-pane="security">Security</li>
+            </ul>
+        </div>
+        <div class="panel-content">
+            <!-- Account pane -->
+            <div class="pane" id="pane-account">
+                <h2>Account</h2>
+                <form id="form-account" class="form-card" onsubmit="return false;">
+                    <div class="form-row">
+                        <label>Full Name
+                            <input type="text" id="account-fullname" placeholder="Your full name">
+                        </label>
+                        <label>Email
+                            <input type="email" id="account-email" placeholder="you@example.com">
+                        </label>
+                    </div>
+                    <div class="form-row">
+                        <label>Phone number
+                            <input type="tel" id="account-phone" placeholder="+212 6...">
+                        </label>
+                        <label>Profile picture
+                            <input type="file" id="account-avatar">
+                        </label>
+                    </div>
+                    <div class="form-actions">
+                        <button class="btn" type="button" id="update-profile">Update profile</button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Security pane -->
+            <div class="pane hidden" id="pane-security">
+                <h2>Security</h2>
+                <form id="form-security" class="form-card" onsubmit="return false;">
+                    <label>Current password
+                        <input type="password" id="current-password">
+                    </label>
+                    <label>New password
+                        <input type="password" id="new-password">
+                    </label>
+                    <label>Confirm password
+                        <input type="password" id="confirm-password">
+                    </label>
+                    <div class="form-actions">
+                        <button class="btn" id="change-password" type="button">Change password</button>
+                    </div>
+                </form>
+                <div class="two-factor">
+                    <label class="toggle-row">Two-factor authentication <input type="checkbox" id="tfa-toggle"></label>
+                </div>
+            </div>
+        </div>
+    </div>
+
 </div>
+<script src="{{ url_for('static', filename='js/settings.js') }}"></script>
 {% endblock %}

@@ -4,6 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SmartApp - {% block title %}Finance Dashboard{% endblock %}</title>
+        <script>
+            // Apply saved theme as early as possible to make it global on every page
+            (function(){
+                try{
+                    var t = localStorage.getItem('theme');
+                    if(t === 'dark') document.documentElement.classList.add('theme-dark');
+                }catch(e){}
+            })();
+        </script>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <!-- Chart.js for charts -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -44,17 +53,17 @@
             </header>
 
             <!-- Flash Messages -->
-            {% with messages = get_flashed_messages() %}
-              {% if messages %}
-                <div class="flash-messages" style="margin-bottom: 20px;">
-                {% for message in messages %}
-                  <div class="alert" style="padding: 12px; background-color: #e0f2f1; color: #00796b; border-radius: 6px; margin-bottom: 10px; border: 1px solid #b2dfdb;">
-                      {{ message }}
-                  </div>
-                {% endfor %}
-                </div>
-              {% endif %}
-            {% endwith %}
+                                {% with messages = get_flashed_messages() %}
+                                    {% if messages %}
+                                        <div class="flash-messages" style="margin-bottom: 20px;">
+                                        {% for message in messages %}
+                                            <div class="alert">
+                                                    {{ message }}
+                                            </div>
+                                        {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                {% endwith %}
 
             {% block content %}{% endblock %}
         </main>

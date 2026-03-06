@@ -16,6 +16,9 @@
     --border-color: #e9e7e5;
     --shadow-sm: 0 6px 18px rgba(31,31,31,0.04);
     --shadow-md: 0 10px 30px rgba(31,31,31,0.06);
+    --on-accent: #ffffff;
+    --accent-2: #2563eb;
+    --brand-green-dark: #128a3b;
     --font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
 }
 
@@ -335,6 +338,17 @@ body {
     background-color: var(--accent-green-dark);
 }
 
+/* Alert component (uses color variables so dark mode can override) */
+.alert{
+    padding: 12px;
+    background-color: var(--accent-green-light);
+    color: var(--accent-green-dark);
+    border-radius: 6px;
+    margin-bottom: 10px;
+    border: 1px solid rgba(63,112,64,0.12);
+}
+.alert a{ color: inherit; text-decoration: underline; }
+
 /* Forms */
 .form-group {
     margin-bottom: 15px;
@@ -369,4 +383,20 @@ body {
 
 .btn-submit:hover {
     background-color: var(--accent-green-dark);
+}
+
+/* Dark theme variables applied when `theme-dark` class is on <html> */
+.theme-dark {
+    --bg-color: #0b1220;
+    --header-bg: #0f1724;
+    --sidebar-bg: #071021;
+    --card-bg: #0e1724;
+    --text-main: #e6eef6;
+    --text-muted: #9fb0c2;
+    --accent-green: #4ade80; /* lighter green for dark bg */
+    --accent-green-dark: #16a34a;
+    --accent-green-light: rgba(74,222,128,0.06);
+    --accent-green-light-2: rgba(22,163,74,0.06);
+    --border-color: rgba(255,255,255,0.06);
+    --shadow-sm: 0 6px 18px rgba(2,6,23,0.6);
 }
