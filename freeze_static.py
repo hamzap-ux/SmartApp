@@ -21,10 +21,17 @@ def fake_url_for(endpoint, filename=None):
     return '/'
 
 env.globals['url_for'] = fake_url_for
+env.globals['get_flashed_messages'] = lambda: []
+env.globals['request'] = type('R',(),{'endpoint': None})()
 
+tpl = env.get_template('login.html')
 # Render login page as the root index
 tpl = env.get_template('login.html')
-html = tpl.render()
+# Provide a minimal `current_user` object expected by base.html
+class _Anon:
+    is_authenticated = False
+
+html = tpl.render(current_user=_Anon())
 with open(os.path.join(OUT, 'index.html'), 'w', encoding='utf-8') as f:
     f.write(html)
 
