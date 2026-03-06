@@ -6,3 +6,4 @@ Flask-Login
 boto3
 python-dateutil
 gunicorn
+Frozen-Flask
