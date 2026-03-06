@@ -8,7 +8,8 @@ from botocore.exceptions import ClientError
 import os
 
 app = Flask(__name__)
-app.secret_key = 'super-secret-key-change-in-production'
+# Allow overriding the secret key with an environment variable in production
+app.secret_key = os.environ.get('SECRET_KEY', 'super-secret-key-change-in-production')
 DB_PATH = Path("data") / "database.sqlite"
 
 # AWS SES Configuration
