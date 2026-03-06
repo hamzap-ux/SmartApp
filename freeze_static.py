@@ -2,6 +2,7 @@
 This does not import the Flask app to avoid heavy runtime imports.
 """
 import os
+import warnings
 from jinja2 import Environment, FileSystemLoader
 import shutil
 
@@ -18,9 +19,28 @@ env = Environment(loader=FileSystemLoader(TEMPLATES))
 def fake_url_for(endpoint, filename=None):
     if endpoint == 'static' and filename:
         return f'static/{filename}'
-    return '/'
+    if endpoint == 'login':
+        return 'index.html'
+    if endpoint == 'register':
+        return 'register.html'
+    warnings.warn(f"fake_url_for: no static mapping for endpoint '{endpoint}', returning '#'")
+    return '#'
+
+# Mock for current_user (unauthenticated visitor on the static login page)
+class _AnonymousUser:
+    is_authenticated = False
+    is_active = False
+    is_anonymous = True
+    id = None
+
+# Mock for request object (no active request in static context)
+class _FakeRequest:
+    endpoint = None
 
 env.globals['url_for'] = fake_url_for
+env.globals['current_user'] = _AnonymousUser()
+env.globals['request'] = _FakeRequest()
+env.globals['get_flashed_messages'] = lambda **kwargs: []
 
 # Render login page as the root index
 tpl = env.get_template('login.html')
