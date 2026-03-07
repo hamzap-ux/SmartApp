@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SmartApp - Login</title>
+        <script>
+            // Apply saved theme as early as possible to make it global on every page
+            (function(){
+                try{
+                    var t = localStorage.getItem('theme');
+                    if(t === 'dark') document.documentElement.classList.add('theme-dark');
+                }catch(e){}
+            })();
+        </script>
+    <link rel="stylesheet" href="static/css/style.css">
+    <!-- Chart.js for charts -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- FontAwesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="app-container">
+        
+
+        <!-- Main Content -->
+        <main class="main-content" style="margin: 0 auto; max-width: 800px; padding-top: 50px;">
+            <header class="top-header">
+                <h1>Login to SmartApp</h1>
+                
+            </header>
+
+            <!-- Flash Messages -->
+                                
+                                    
+                                
+
+            
+<div class="chart-card" style="max-width: 400px; margin: 0 auto;">
+    <h2 style="text-align: center; margin-bottom: 20px;">Welcome Back</h2>
+    <form action="/" method="POST">
+        <div class="form-group">
+            <label for="email">Email</label>
+            <input type="email" id="email" name="email" class="form-control" required>
+        </div>
+        <div class="form-group">
+            <label for="password">Password</label>
+            <input type="password" id="password" name="password" class="form-control" required>
+        </div>
+        <button type="submit" class="btn-submit">Login</button>
+    </form>
+    <p style="text-align: center; margin-top: 15px;">
+        Don't have an account? <a href="/register.html" style="color: var(--accent-teal);">Register here</a>
+    </p>
+</div>
+
+        </main>
+    </div>
+
+    
+</body>
+</html>
