@@ -84,4 +84,8 @@ if os.path.exists(STATIC):
         shutil.rmtree(dest_static)
     shutil.copytree(STATIC, dest_static)
 
+# Create a .nojekyll marker so GitHub Pages serves files as-is
+nojekyll_path = os.path.join(OUT, '.nojekyll')
+open(nojekyll_path, 'w', encoding='utf-8').close()
+
 print('Static site generated in', OUT)
