@@ -48,6 +48,16 @@ html = tpl.render()
 with open(os.path.join(OUT, 'index.html'), 'w', encoding='utf-8') as f:
     f.write(html)
 
+# Render register page
+tpl_reg = env.get_template('register.html')
+html_reg = tpl_reg.render()
+with open(os.path.join(OUT, 'register.html'), 'w', encoding='utf-8') as f:
+    f.write(html_reg)
+
+# Disable Jekyll so GitHub Pages serves the HTML as-is (empty marker file)
+with open(os.path.join(OUT, '.nojekyll'), 'w') as f:
+    f.write('')
+
 # Copy static assets
 if os.path.exists(STATIC):
     dest_static = os.path.join(OUT, 'static')
